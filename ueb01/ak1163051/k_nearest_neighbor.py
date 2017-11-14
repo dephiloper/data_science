@@ -1,4 +1,6 @@
 import numpy as np
+from tqdm import tqdm
+from collections import Counter
 
 class KNearestNeighbor(object):
     """ a kNN classifier with Euclidean distance """
@@ -68,7 +70,10 @@ class KNearestNeighbor(object):
         # jth training point, and store the result in dists[i, j]. You      #
         # should not use a loop over dimension.                             #
         #####################################################################
-        
+        for i in tqdm(range(num_test), ascii=False, desc="euclidean distance calculation"):
+            for j in range(num_train):
+                diff = self.X_train[j] - X[i]
+                dists[i][j] = np.sqrt(np.dot(diff.T, diff))
         #####################################################################
         #                       END OF YOUR CODE                            #
         #####################################################################
@@ -102,12 +107,39 @@ class KNearestNeighbor(object):
         # Hint: Try to formulate the Euclidean distance using matrix            #
         #       multiplication and two broadcast sums.                          #
         #########################################################################
+        X_train_2 = self.X_train*self.X_train
+        X_train_2 = np.sum(X_train_2, axis = 1)
+
+        X_train_2_repeat = np.array([X_train_2]*X.shape[0])
+
+        X_2 = X*X
+        X_2 = np.sum(X_2, axis = 1)
+        X_2_repeat = np.array( [X_2]*self.X_train.shape[0]).transpose()
+
+        X_dot_X_train = X.dot(self.X_train.T)
+
+        dists = X_train_2_repeat + X_2_repeat - 2*X_dot_X_train
+        dists = np.sqrt(dists)
         
+        
+        return dists
         #########################################################################
         #                         END OF YOUR CODE                              #
         #########################################################################
         return dists
 
+    def most_common(self, arr):
+        results = Counter(arr).most_common(1)[0] # return all most common elements - draws (element, amount of occurrence)
+        if (type(results) is np.ndarray):
+            result = min(results)
+            #example result = [(2, 2), (5, 2)]
+            #occurence (second element) is always the same, therefore only the label differs
+        else:
+            result = results
+            
+        return result[0]
+        #return only the label
+    
     def predict_labels(self, dists, k=1):
         """
         Given a matrix of distances between test points and training points,
@@ -126,15 +158,15 @@ class KNearestNeighbor(object):
         for i in range(num_test):
             # A list of length k storing the labels of the k nearest neighbors to the ith test point.
             closest_y = []
-
             #########################################################################
             # TODO (2):                                                             #
             # Use the distance matrix to find the k nearest neighbors of the ith    #
             # testing point, and use self.y_train to find the labels of these       #
             # neighbors. Store these labels in closest_y.                           #
             # Hint: Look up the function numpy.argsort.                             #
-            #########################################################################
-            
+            #########################################################################                
+            nearest_index = np.argsort(dists[i])[:k] #0 to k-1
+            closest_y = self.y_train[nearest_index]
             #########################################################################
             # TODO (2):                                                             #
             # Now that you have found the labels of the k nearest neighbors, you    #
@@ -142,7 +174,7 @@ class KNearestNeighbor(object):
             # Store this label in y_pred[i]. Break ties by choosing the smaller     #
             # label.                                                                #
             #########################################################################
-            
+            y_pred[i] = self.most_common(closest_y)
             #########################################################################
             #                           END OF YOUR CODE                            #
             #########################################################################
