@@ -3,3 +3,4 @@ cifar-10-batches-py/
 *.pyc
 .DS_Store
 .ipynb_checkpoints/
+.venv

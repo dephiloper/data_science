@@ -107,22 +107,7 @@ class KNearestNeighbor(object):
         # Hint: Try to formulate the Euclidean distance using matrix            #
         #       multiplication and two broadcast sums.                          #
         #########################################################################
-        X_train_2 = self.X_train*self.X_train
-        X_train_2 = np.sum(X_train_2, axis = 1)
-
-        X_train_2_repeat = np.array([X_train_2]*X.shape[0])
-
-        X_2 = X*X
-        X_2 = np.sum(X_2, axis = 1)
-        X_2_repeat = np.array( [X_2]*self.X_train.shape[0]).transpose()
-
-        X_dot_X_train = X.dot(self.X_train.T)
-
-        dists = X_train_2_repeat + X_2_repeat - 2*X_dot_X_train
-        dists = np.sqrt(dists)
-        
-        
-        return dists
+        dists = np.sqrt((X**2).sum(axis=1, keepdims=True) + (self.X_train**2).sum(axis=1) - 2 * X.dot(self.X_train.T))
         #########################################################################
         #                         END OF YOUR CODE                              #
         #########################################################################
