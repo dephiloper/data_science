@@ -114,6 +114,7 @@ class KNearestNeighbor(object):
         return dists
 
     def most_common(self, arr):
+        arr = sorted(arr)
         results = Counter(arr).most_common(1)[0] # return all most common elements - draws (element, amount of occurrence)
         if (type(results) is np.ndarray):
             result = min(results)
